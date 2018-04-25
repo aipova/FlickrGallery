@@ -2,9 +2,8 @@ package ru.aipova.photogallery.service
 
 import android.net.Uri
 import android.util.Log
+import com.google.gson.Gson
 import org.json.JSONException
-import org.json.JSONObject
-import ru.aipova.photogallery.model.GalleryItem
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -21,14 +20,14 @@ class FlickrFetchr {
         }
     }
 
-    fun fetchItems(): MutableList<GalleryItem> {
+    fun fetchItems(page: Int = 1): MutableList<GalleryItem> {
         val items = mutableListOf<GalleryItem>()
         try {
             val url = buildFlickrRequestUrl()
             val jsonStrong = getUtlString(url)
             Log.i(TAG, "Received JSON: $jsonStrong")
-            val jsonBody = JSONObject(jsonStrong)
-            parseItems(items, jsonBody)
+            val response = Gson().fromJson(jsonStrong, FlickrResponse::class.java)
+            items.addAll(response.photos.items.filterNot { it.url.isNullOrEmpty() })
 
         } catch (ioe: IOException) {
             Log.e(TAG, "Failed to fetch items", ioe)
@@ -38,23 +37,7 @@ class FlickrFetchr {
         return items
     }
 
-    private fun parseItems(items: MutableList<GalleryItem>, jsonBody: JSONObject): Unit {
-        val photosObject = jsonBody.getJSONObject("photos")
-        val photoArray = photosObject.getJSONArray("photo")
-        for (i in 0 until photoArray.length()) {
-            val photoObject = photoArray.getJSONObject(i)
-            if (photoObject.has("url_s")) {
-                val galleryItem = GalleryItem(
-                    photoObject.getString("id"),
-                    photoObject.getString("title"),
-                    photoObject.getString("url_s")
-                )
-                items.add(galleryItem)
-            }
-        }
-    }
-
-    private fun buildFlickrRequestUrl(): String {
+    private fun buildFlickrRequestUrl(page: Int = 1): String {
         return Uri.parse(API_PATH)
             .buildUpon()
             .appendQueryParameter("method", "flickr.photos.getRecent")
@@ -62,6 +45,8 @@ class FlickrFetchr {
             .appendQueryParameter("format", "json")
             .appendQueryParameter("nojsoncallback", "1")
             .appendQueryParameter("extras", "url_s")
+            .appendQueryParameter("page", page.toString())
+            .appendQueryParameter("per_page", "50")
             .build().toString()
     }
 
