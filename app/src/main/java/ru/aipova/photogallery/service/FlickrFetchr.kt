@@ -20,6 +20,16 @@ class FlickrFetchr {
         }
     }
 
+    fun getUtlBytes(urlSpec: String): ByteArray {
+        val url = URL(urlSpec)
+        val connection = url.openConnection() as HttpURLConnection
+        try {
+            return connection.inputStream.use { it.readBytes(1024) }
+        } finally {
+            connection.disconnect()
+        }
+    }
+
     fun fetchItems(page: Int = 1): MutableList<GalleryItem> {
         val items = mutableListOf<GalleryItem>()
         try {
