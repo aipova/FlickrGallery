@@ -6,6 +6,9 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
 import android.util.Log
+import ru.aipova.photogallery.BitmapCache.Companion.addBitmapToCache
+import ru.aipova.photogallery.BitmapCache.Companion.getBitmapFromCache
+import ru.aipova.photogallery.fragment.PhotoGalleryFragment
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 
@@ -33,7 +36,7 @@ class ThumbnailDownloader<T>(val responseHandler: Handler) : HandlerThread(TAG) 
     override fun onLooperPrepared() {
         requestHandler = object : Handler() {
             override fun handleMessage(msg: Message?) {
-                if (msg != null && msg.what == MESSAGE_DOWNLOAD) {
+                if (msg != null && msg.what == MESSAGE_DOWNLOAD && requestMap[msg.obj as T] != null) {
                     Log.i(TAG, "Got request for URL: " + requestMap[msg.obj as T])
                     handleRequest(msg.obj as T)
                 }
@@ -45,14 +48,18 @@ class ThumbnailDownloader<T>(val responseHandler: Handler) : HandlerThread(TAG) 
         try {
             val url = requestMap[target] ?: return
 
-            val bitmapBytes = FlickrFetchr().getUtlBytes(url)
-            val bitmap = BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.size)
-            Log.i(TAG, "Bitmap created")
+            var bitmap = getBitmapFromCache(url)
 
+            if (bitmap == null) {
+                val bitmapBytes = FlickrFetchr().getUtlBytes(url)
+                bitmap = BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.size)
+                Log.i(TAG, "Bitmap created")
+                addBitmapToCache(url, bitmap)
+            }
             responseHandler.post {
                 if (requestMap[target] == url && !hasQuit) {
                     requestMap.remove(target)
-                    thumbnailDownloadListener?.onThumbnailDownloaded(target, bitmap)
+                    thumbnailDownloadListener?.onThumbnailDownloaded(target, bitmap!!)
                 }
             }
         } catch (ioe: IOException) {
@@ -61,7 +68,8 @@ class ThumbnailDownloader<T>(val responseHandler: Handler) : HandlerThread(TAG) 
     }
 
     fun queueThumbnail(target: T, url: String?) {
-        Log.i(TAG, "Got a URL: $url")
+        val type = if (target is PhotoGalleryFragment.PhotoHolder) { "DOWNLOAD"} else {"PRELOAD"}
+        Log.i(TAG, "Got a URL for $type: $url")
         if (url == null) {
             requestMap.remove(target)
         } else {
