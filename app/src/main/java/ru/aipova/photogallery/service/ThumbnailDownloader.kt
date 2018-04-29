@@ -17,9 +17,9 @@ class ThumbnailDownloader<T>(val responseHandler: Handler) : HandlerThread(TAG) 
     private var hasQuit = false
     private lateinit var requestHandler: Handler
     private val requestMap = ConcurrentHashMap<T, String>()
-    var thumbnailDownloadListener: ThumbnailDownloadListener<T>? = null
+    var listener: Listener<T>? = null
 
-    interface ThumbnailDownloadListener<T> {
+    interface Listener<T> {
         fun onThumbnailDownloaded(target: T, thumbnail: Bitmap)
     }
 
@@ -59,7 +59,7 @@ class ThumbnailDownloader<T>(val responseHandler: Handler) : HandlerThread(TAG) 
             responseHandler.post {
                 if (requestMap[target] == url && !hasQuit) {
                     requestMap.remove(target)
-                    thumbnailDownloadListener?.onThumbnailDownloaded(target, bitmap!!)
+                    listener?.onThumbnailDownloaded(target, bitmap!!)
                 }
             }
         } catch (ioe: IOException) {

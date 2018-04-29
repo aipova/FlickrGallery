@@ -10,7 +10,7 @@ import java.net.URL
 
 class FlickrFetchr {
 
-    fun getUtlString(urlSpec: String): String {
+    private fun getUtlString(urlSpec: String): String {
         val url = URL(urlSpec)
         val connection = url.openConnection() as HttpURLConnection
         try {
@@ -30,10 +30,9 @@ class FlickrFetchr {
         }
     }
 
-    fun fetchItems(page: Int = 1): MutableList<GalleryItem> {
+    private fun downloadGalleryItems(url: String): MutableList<GalleryItem> {
         val items = mutableListOf<GalleryItem>()
         try {
-            val url = buildFlickrRequestUrl()
             val jsonStrong = getUtlString(url)
             Log.i(TAG, "Received JSON: $jsonStrong")
             val response = Gson().fromJson(jsonStrong, FlickrResponse::class.java)
@@ -47,22 +46,39 @@ class FlickrFetchr {
         return items
     }
 
-    private fun buildFlickrRequestUrl(page: Int = 1): String {
-        return Uri.parse(API_PATH)
-            .buildUpon()
-            .appendQueryParameter("method", "flickr.photos.getRecent")
+    fun fetchRecent(page: Int = 1): MutableList<GalleryItem> {
+        val url = buildFlickrRequestUrl(GET_RECENT, page)
+        return downloadGalleryItems(url)
+    }
+
+    fun searchPhotos(query: String, page: Int = 1): MutableList<GalleryItem> {
+        val url = buildFlickrRequestUrl(SEARCH, page, query)
+        return downloadGalleryItems(url)
+    }
+
+
+    private fun buildFlickrRequestUrl(method: String, page: Int, query: String? = null): String {
+        val urlBuilder = ENDPOINT.buildUpon()
+            .appendQueryParameter("method", method)
+            .appendQueryParameter("page", page.toString())
+        if (method == SEARCH) {
+            urlBuilder.appendQueryParameter("text", query)
+        }
+        return urlBuilder.build().toString()
+    }
+
+    companion object {
+        private val TAG = FlickrFetchr::class.java.name
+        private const val API_KEY = "88bc56ee304b286682cebdd02f3af505"
+        private const val API_PATH = "https://api.flickr.com/services/rest/"
+        private const val GET_RECENT = "flickr.photos.getRecent"
+        private const val SEARCH = "flickr.photos.search"
+        private val ENDPOINT = Uri.parse(API_PATH).buildUpon()
             .appendQueryParameter("api_key", API_KEY)
             .appendQueryParameter("format", "json")
             .appendQueryParameter("nojsoncallback", "1")
             .appendQueryParameter("extras", "url_s")
-            .appendQueryParameter("page", page.toString())
             .appendQueryParameter("per_page", "50")
-            .build().toString()
-    }
-
-    companion object {
-        val TAG = FlickrFetchr::class.java.name
-        const val API_KEY = "88bc56ee304b286682cebdd02f3af505"
-        const val API_PATH = "https://api.flickr.com/services/rest/"
+            .build()
     }
 }
