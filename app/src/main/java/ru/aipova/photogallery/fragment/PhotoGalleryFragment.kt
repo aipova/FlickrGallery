@@ -25,6 +25,7 @@ import ru.aipova.photogallery.QueryPreferences.Companion.getStoredQuery
 import ru.aipova.photogallery.R
 import ru.aipova.photogallery.service.FlickrFetchr
 import ru.aipova.photogallery.service.GalleryItem
+import ru.aipova.photogallery.service.PollService
 import ru.aipova.photogallery.service.ThumbnailDownloader
 import java.lang.ref.WeakReference
 import kotlin.math.max
@@ -72,12 +73,25 @@ class PhotoGalleryFragment : Fragment() {
         searchView.setOnSearchClickListener {
             searchView.setQuery(QueryPreferences.getStoredQuery(activity), false)
         }
+
+        val togglePollItem = menu.findItem(R.id.menu_item_toggle_polling)
+        if (PollService.isServiceAlarmOn(activity)) {
+            togglePollItem.setTitle(R.string.stop_polling)
+        } else {
+            togglePollItem.setTitle(R.string.start_polling)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem?) = when (item?.itemId) {
         R.id.menu_item_clear -> {
             QueryPreferences.setStoredQuery(activity, null)
             clearAndUpdateItems()
+            true
+        }
+        R.id.menu_item_toggle_polling -> {
+            val shouldStartAlarm = !PollService.isServiceAlarmOn(activity)
+            PollService.setServiceAlarm(activity, shouldStartAlarm)
+            activity?.invalidateOptionsMenu()
             true
         }
         else -> super.onOptionsItemSelected(item)
