@@ -25,7 +25,7 @@ import ru.aipova.photogallery.QueryPreferences.Companion.getStoredQuery
 import ru.aipova.photogallery.R
 import ru.aipova.photogallery.service.FlickrFetchr
 import ru.aipova.photogallery.service.GalleryItem
-import ru.aipova.photogallery.service.PollService
+import ru.aipova.photogallery.service.PhotoPollStarter
 import ru.aipova.photogallery.service.ThumbnailDownloader
 import java.lang.ref.WeakReference
 import kotlin.math.max
@@ -75,7 +75,7 @@ class PhotoGalleryFragment : Fragment() {
         }
 
         val togglePollItem = menu.findItem(R.id.menu_item_toggle_polling)
-        if (PollService.isServiceAlarmOn(activity)) {
+        if (PhotoPollStarter.isPollingOn(activity)) {
             togglePollItem.setTitle(R.string.stop_polling)
         } else {
             togglePollItem.setTitle(R.string.start_polling)
@@ -89,14 +89,21 @@ class PhotoGalleryFragment : Fragment() {
             true
         }
         R.id.menu_item_toggle_polling -> {
-            val shouldStartAlarm = !PollService.isServiceAlarmOn(activity)
-            PollService.setServiceAlarm(activity, shouldStartAlarm)
+            togglePhotoPoll()
             activity?.invalidateOptionsMenu()
             true
         }
         else -> super.onOptionsItemSelected(item)
     }
 
+    private fun togglePhotoPoll() {
+        val shouldStartPoll = !PhotoPollStarter.isPollingOn(activity)
+        if (shouldStartPoll) {
+            PhotoPollStarter.startPolling(activity)
+        } else {
+            PhotoPollStarter.stopPolling(activity)
+        }
+    }
 
     private fun clearAndUpdateItems() {
         currentPage = 1

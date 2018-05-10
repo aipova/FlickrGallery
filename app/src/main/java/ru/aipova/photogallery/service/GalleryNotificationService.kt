@@ -7,11 +7,13 @@ import android.content.Context
 import android.os.Build
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
+import ru.aipova.photogallery.PhotoGalleryActivity
 import ru.aipova.photogallery.R
 
 class GalleryNotificationService {
     companion object {
-        const val NOTIFICATION_CHANNEL_ID = "ru.aipova.photogallery.channel.newpictures"
+        private const val NOTIFICATION_CHANNEL_ID = "ru.aipova.photogallery.channel.newpictures"
+
         fun createNotificationChannel(context: Context) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val channelName = context.getString(R.string.new_pictures_notifications)
@@ -21,7 +23,9 @@ class GalleryNotificationService {
             }
         }
 
-        fun sendNewPicturesNotification(ctx: Context, pendingIntent: PendingIntent) {
+        fun sendNewPicturesNotification(ctx: Context) {
+            val pendingIntent =
+                PendingIntent.getActivity(ctx, 0, PhotoGalleryActivity.newIntent(ctx), 0)
             val resources = ctx.resources
             val notification = NotificationCompat.Builder(ctx, NOTIFICATION_CHANNEL_ID)
                 .setTicker(resources.getString(R.string.new_pictures_title))
