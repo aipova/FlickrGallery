@@ -8,7 +8,6 @@ import android.graphics.drawable.Drawable
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
-import android.support.v4.app.Fragment
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
@@ -31,7 +30,7 @@ import java.lang.ref.WeakReference
 import kotlin.math.max
 import kotlin.math.min
 
-class PhotoGalleryFragment : Fragment() {
+class PhotoGalleryFragment : VisibleFragment() {
 
     private lateinit var photoRecyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar

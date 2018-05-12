@@ -1,9 +1,8 @@
 package ru.aipova.photogallery.service
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
@@ -13,6 +12,10 @@ import ru.aipova.photogallery.R
 class GalleryNotificationService {
     companion object {
         private const val NOTIFICATION_CHANNEL_ID = "ru.aipova.photogallery.channel.newpictures"
+        const val ACTION_SHOW_NOTIFICATION = "ru.aipova.photogallery.SHOW_NOTIFICATION"
+        const val PERM_PRIVATE = "ru.aipova.photogallery.PRIVATE"
+        const val REQUEST_CODE = "REQUEST_CODE"
+        const val NOTIFICATION = "NOTIFICATION"
 
         fun createNotificationChannel(context: Context) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -35,7 +38,19 @@ class GalleryNotificationService {
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
                 .build()
-            NotificationManagerCompat.from(ctx).notify(0, notification)
+            showBackgroundNotification(ctx, 0, notification)
+        }
+
+        fun send(ctx: Context, requestCode: Int, notification: Notification) {
+            NotificationManagerCompat.from(ctx).notify(requestCode, notification)
+        }
+
+        private fun showBackgroundNotification(ctx: Context, requestCode: Int, notification: Notification) {
+            val i = Intent(ACTION_SHOW_NOTIFICATION).apply {
+                putExtra(REQUEST_CODE, requestCode)
+                putExtra(NOTIFICATION, notification)
+            }
+            ctx.sendOrderedBroadcast(i, PERM_PRIVATE, null, null, Activity.RESULT_OK, null, null)
         }
     }
 }

@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.SystemClock
 import android.support.annotation.RequiresApi
 import android.util.Log
+import ru.aipova.photogallery.QueryPreferences
 import java.util.concurrent.TimeUnit
 
 class PhotoPollStarter private constructor() {
@@ -44,6 +45,7 @@ class PhotoPollStarter private constructor() {
                 schedulePollingJob(context)
             } else {
                 setupAlarmManager(context)
+                QueryPreferences.setAlarmOn(context)
             }
         }
 
@@ -84,6 +86,7 @@ class PhotoPollStarter private constructor() {
                 cancelScheduledJob(context)
             } else {
                 cancelAlarmSetup(context)
+                QueryPreferences.setAlarmOff(context)
             }
         }
 
