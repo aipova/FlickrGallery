@@ -1,8 +1,9 @@
-package ru.aipova.photogallery
+package ru.aipova.photogallery.activity
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
+import ru.aipova.photogallery.R
 
 abstract class SingleFragmentActivity : AppCompatActivity() {
 

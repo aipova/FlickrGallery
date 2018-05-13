@@ -1,4 +1,4 @@
-package ru.aipova.photogallery
+package ru.aipova.photogallery.activity
 
 import android.content.Context
 import android.content.Intent

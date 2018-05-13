@@ -6,7 +6,7 @@ import android.content.Intent
 import android.os.Build
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
-import ru.aipova.photogallery.PhotoGalleryActivity
+import ru.aipova.photogallery.activity.PhotoGalleryActivity
 import ru.aipova.photogallery.R
 
 class GalleryNotificationService {

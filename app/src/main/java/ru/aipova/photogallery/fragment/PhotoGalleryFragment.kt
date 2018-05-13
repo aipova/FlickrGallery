@@ -22,6 +22,7 @@ import ru.aipova.photogallery.BitmapCache.Companion.getBitmapFromCache
 import ru.aipova.photogallery.QueryPreferences
 import ru.aipova.photogallery.QueryPreferences.Companion.getStoredQuery
 import ru.aipova.photogallery.R
+import ru.aipova.photogallery.activity.PhotoPageActivity
 import ru.aipova.photogallery.service.FlickrFetchr
 import ru.aipova.photogallery.service.GalleryItem
 import ru.aipova.photogallery.service.PhotoPollStarter
@@ -210,9 +211,13 @@ class PhotoGalleryFragment : VisibleFragment() {
         }
     }
 
-    inner class PhotoHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class PhotoHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
         private val itemImageView = view.findViewById<ImageView>(R.id.item_image_view)
-        var imageUrl: String? = null
+        init {
+            itemImageView.setOnClickListener(this)
+        }
+
+        private var galleryItem: GalleryItem? = null
 
         fun bindDrawable(drawable: Drawable) {
             itemImageView.setImageDrawable(drawable)
@@ -222,8 +227,13 @@ class PhotoGalleryFragment : VisibleFragment() {
             itemImageView.setImageDrawable(null)
         }
 
-        fun bindImageUrl(url: String?) {
-            imageUrl = url
+        fun bindGalleryItem(galleryItem: GalleryItem) {
+            this.galleryItem = galleryItem
+        }
+
+        override fun onClick(v: View?) {
+            val i = PhotoPageActivity.newIntent(activity, galleryItem?.getPhotoPageUri())
+            startActivity(i)
         }
     }
 
@@ -240,7 +250,7 @@ class PhotoGalleryFragment : VisibleFragment() {
 
         override fun onBindViewHolder(holder: PhotoHolder, position: Int) {
             val galleryItem = galleryItems[position]
-            holder.bindImageUrl(galleryItem.url)
+            holder.bindGalleryItem(galleryItem)
             val bitmapFromCache = getBitmapFromCache(galleryItem.url)
             if (bitmapFromCache != null) {
                 holder.bindDrawable(BitmapDrawable(resources, bitmapFromCache))
