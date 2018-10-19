@@ -20,7 +20,7 @@ class PhotoPollStarter private constructor() {
     companion object {
         private const val TAG = "PhotoPollStarter"
         private const val JOB_ID = 1
-        private val POLL_INTERVAL_MS = TimeUnit.MINUTES.toMillis(1)
+        private val POLL_INTERVAL_MS = TimeUnit.MINUTES.toMillis(15)
 
         fun isPollingOn(context: Context?) =
             if (jobSchedulerAvailable()) {
@@ -41,12 +41,12 @@ class PhotoPollStarter private constructor() {
             context?.getSystemService(JOB_SCHEDULER_SERVICE) as JobScheduler
 
         fun startPolling(context: Context?) {
-//            if (jobSchedulerAvailable()) {
-//                schedulePollingJob(context)
-//            } else {
+            if (jobSchedulerAvailable()) {
+                schedulePollingJob(context)
+            } else {
                 setupAlarmManager(context)
                 QueryPreferences.setAlarmOn(context)
-            //}
+            }
         }
 
         @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
