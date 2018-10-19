@@ -41,12 +41,12 @@ class PhotoPollStarter private constructor() {
             context?.getSystemService(JOB_SCHEDULER_SERVICE) as JobScheduler
 
         fun startPolling(context: Context?) {
-            if (jobSchedulerAvailable()) {
-                schedulePollingJob(context)
-            } else {
+//            if (jobSchedulerAvailable()) {
+//                schedulePollingJob(context)
+//            } else {
                 setupAlarmManager(context)
                 QueryPreferences.setAlarmOn(context)
-            }
+            //}
         }
 
         @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

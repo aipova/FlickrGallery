@@ -16,11 +16,12 @@ class PhotoChecker private constructor() {
             }
 
             val resultId = galleryItems.first().id
+            val result = galleryItems.first()
             if (resultId == getLastResultId(context)) {
                 Log.i(TAG, "Got an old result: $resultId")
             } else {
                 Log.i(TAG, "Got a new result: $resultId")
-                GalleryNotificationService.sendNewPicturesNotification(context)
+                GalleryNotificationService.sendNewPicturesNotification(context, result)
                 updateLastResultId(context, resultId)
             }
         }
