@@ -6,8 +6,9 @@ import android.content.Intent
 import android.os.Build
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
-import ru.aipova.photogallery.activity.PhotoGalleryActivity
+import com.squareup.picasso.Picasso
 import ru.aipova.photogallery.R
+import ru.aipova.photogallery.activity.PhotoGalleryActivity
 
 class GalleryNotificationService {
     companion object {
@@ -26,16 +27,21 @@ class GalleryNotificationService {
             }
         }
 
-        fun sendNewPicturesNotification(ctx: Context) {
+        fun sendNewPicturesNotification(
+            ctx: Context,
+            result: GalleryItem
+        ) {
             val pendingIntent =
                 PendingIntent.getActivity(ctx, 0, PhotoGalleryActivity.newIntent(ctx), 0)
             val resources = ctx.resources
+            val image = Picasso.get().load(result.url).get()
             val notification = NotificationCompat.Builder(ctx, NOTIFICATION_CHANNEL_ID)
                 .setTicker(resources.getString(R.string.new_pictures_title))
                 .setSmallIcon(android.R.drawable.ic_menu_report_image)
                 .setContentTitle(resources.getString(R.string.new_pictures_title))
                 .setContentText(resources.getString(R.string.new_pictures_text))
                 .setContentIntent(pendingIntent)
+                .setStyle(NotificationCompat.BigPictureStyle().bigPicture(image))
                 .setAutoCancel(true)
                 .build()
             showBackgroundNotification(ctx, 0, notification)
